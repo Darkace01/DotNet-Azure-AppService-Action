@@ -1,38 +1,54 @@
-name: Build and deploy .NET Core app to Linux WebApp elibrary-project
+name: Build and deploy .NET Core app to Azure App Service Linux
 on:
   push:
     branches:
     - main
 env:
+  # Web app name frorm Azure
   AZURE_WEBAPP_NAME: .
+  # The folder part of the web project it can just be `.` if it is the same as the root
   AZURE_WEBAPP_PACKAGE_PATH: .
+  # The publish profile can be saved as a secret in your repository settings
   AZURE_WEBAPP_PUBLISH_PROFILE: ${{ secrets.PUBLISH_PROFILE }}
+  # Configuration for the build and publish
   CONFIGURATION: Release
+  # .Net Core version
   DOTNET_CORE_VERSION: 6.0.x
-  WORKING_DIRECTORY: ELibrary
+  # Working directory
+  WORKING_DIRECTORY: .
 jobs:
   build-and-deploy:
     runs-on: ubuntu-latest
     steps:
+    # Check out the repo and fetch the docker container for .Net
     - uses: actions/checkout@v2
     - name: Setup .NET Core
       uses: actions/setup-dotnet@v1
       with:
         dotnet-version: ${{ env.DOTNET_CORE_VERSION }}
+        
+    # Restore nugget packages
     - name: Restore
       run: dotnet restore "${{ env.WORKING_DIRECTORY }}"
+    # Build the application
     - name: Build
       run: dotnet build "${{ env.WORKING_DIRECTORY }}" --configuration ${{ env.CONFIGURATION }} --no-restore
+    #OPTIONAL: if you have usit test in place
     - name: Test
       run: dotnet test "${{ env.WORKING_DIRECTORY }}" --no-build
+    # Publish application to output directory
     - name: Publish
       run: dotnet publish "${{ env.WORKING_DIRECTORY }}" --configuration ${{ env.CONFIGURATION }} --no-build --output "${{ env.AZURE_WEBAPP_PACKAGE_PATH }}"
+      
+    # Deploy published application to Azure
     - name: Deploy to Azure WebApp
       uses: azure/webapps-deploy@v2
       with:
         app-name: ${{ env.AZURE_WEBAPP_NAME }}
         package: ${{ env.AZURE_WEBAPP_PACKAGE_PATH }}
         publish-profile: ${{ env.AZURE_WEBAPP_PUBLISH_PROFILE }}
+        
+    # OPTIONAL: To save artifact for debugging
     - name: Publish Artifacts
       uses: actions/upload-artifact@v1.0.0
       with:
