@@ -1,4 +1,6 @@
 name: Build and deploy .NET Core app to Azure App Service Linux
+icon: check-circle
+color: red
 on:
   push:
     branches:
