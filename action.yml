@@ -1,7 +1,7 @@
 name: Build and deploy .NET Core app to Azure App Service Linux
+description: Packages and Steps to build, test and publish a .Net core application and also deploy it to Azure App Service Linux instance
 icon: check-circle
 color: red
-description: Packages and Steps to build, test and publish a .Net core application and also deploy it to Azure App Service Linux instance
 on:
   push:
     branches:
